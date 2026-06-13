@@ -1,0 +1,86 @@
+# ────────────────────────────────────────────
+#  작업 진행 현황 (로컬 전용)
+# ────────────────────────────────────────────
+PROGRESS.md
+
+# ────────────────────────────────────────────
+#  시크릿 / 환경 설정 (절대 커밋 금지)
+# ────────────────────────────────────────────
+.env
+*.env.local
+*.env.*.local
+
+# ────────────────────────────────────────────
+#  Python (rag-service)
+# ────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+coverage.xml
+
+# ────────────────────────────────────────────
+#  Java / Spring Boot (auth-service)
+# ────────────────────────────────────────────
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# ────────────────────────────────────────────
+#  Node.js / React + Vite (frontend)
+# ────────────────────────────────────────────
+node_modules/
+frontend/dist/
+frontend/.vite/
+frontend/coverage/
+*.local
+
+# ────────────────────────────────────────────
+#  Docker
+# ────────────────────────────────────────────
+# 로컬 볼륨 데이터 (pg_data 등)은 compose down -v 로 관리
+docker-compose.override.yml
+
+# ────────────────────────────────────────────
+#  IDE
+# ────────────────────────────────────────────
+.idea/
+*.iml
+.vscode/
+*.code-workspace
+
+# ────────────────────────────────────────────
+#  OS
+# ────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ────────────────────────────────────────────
+#  로그 / 임시
+# ────────────────────────────────────────────
+*.log
+logs/
+tmp/
+temp/

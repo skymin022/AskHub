@@ -1,0 +1,26 @@
+# 기초 단계: PostgreSQL만 먼저 띄워 스키마/계정 격리를 검증한다.
+# 후속 단계에서 nginx / spring-auth / python-rag / ollama / ragflow(공식 compose include)를 추가.
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      # init 스크립트(01_roles.sh)가 참조하는 서비스 계정 비밀번호
+      AUTH_DB_PASSWORD: ${AUTH_DB_PASSWORD}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      # 최초 기동 시 알파벳 순(01→02→03)으로 1회 실행
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  pg_data:
