@@ -1,6 +1,33 @@
-# 기초 단계: PostgreSQL만 먼저 띄워 스키마/계정 격리를 검증한다.
-# 후속 단계에서 nginx / spring-auth / python-rag / ollama / ragflow(공식 compose include)를 추가.
+# 1단계: PostgreSQL + Ollama(LLM/VLM, GPU). RAGFlow는 자체 compose(infra/ragflow)로 별도 기동.
+# 후속 단계에서 nginx / spring-auth / python-rag를 추가.
 services:
+  # ── Ollama (LLM=qwen3:8b 질의 / VLM=qwen3-vl:8b 색인) ──────────────
+  # GPU 패스스루(RTX 4070 Ti). 모델 스토어는 호스트에 이미 받아둔 24GB를 재사용(재다운로드 회피).
+  # 다른 머신/CI: OLLAMA_STORE를 비우고 아래 named volume(ollama_data)로 전환 후 models/pull_models.sh 실행.
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    ports:
+      - "11434:11434"               # 로컬 개발 편의. 운영 전환 시 내부망 한정 검토.
+    volumes:
+      - "${OLLAMA_STORE:-ollama_data}:/root/.ollama"
+    environment:
+      - OLLAMA_MAX_LOADED_MODELS=1   # B1: VLM(색인)·LLM(질의) 동시 적재로 인한 OOM 방지
+      - OLLAMA_KEEP_ALIVE=5m         # 유휴 시 언로드해 VRAM 회수(콜드스타트 비용은 B3에서 별도)
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    healthcheck:
+      test: ["CMD-SHELL", "ollama list >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── PostgreSQL (단일 인스턴스, auth/app 스키마 분리) ──────────────
   postgres:
     image: postgres:16
     environment:
@@ -24,3 +51,4 @@ services:
 
 volumes:
   pg_data:
+  ollama_data:   # OLLAMA_STORE 미설정(다른 머신/CI) 시 사용되는 named volume
